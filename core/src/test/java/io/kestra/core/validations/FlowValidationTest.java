@@ -188,6 +188,20 @@ class FlowValidationTest {
     }
 
     @Test
+    void shouldReportViolationWhenTaskIdContainsRegexSyntax() {
+        Flow flow = YamlParser.parse("""
+            id: regex-id
+            namespace: io.kestra.tests
+            tasks:
+              - id: "a-("
+                type: io.kestra.plugin.core.log.Log
+                message: hello
+            """, Flow.class);
+
+        assertThat(modelValidator.isValid(flow)).hasValueSatisfying(e -> assertThat(e.getMessage()).contains("must match"));
+    }
+
+    @Test
     void validFlowShouldSucceed() {
         Flow flow = this.parse("flows/valids/minimal.yaml");
         Optional<ConstraintViolationException> validate = modelValidator.isValid(flow);
